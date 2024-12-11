@@ -46,6 +46,6 @@ int main (){
     printf("Creating thread\n");
     
     pthread_create(&thread,NULL,thread1,NULL);
-    
-    scanf("Enter to end\n");
+    printf("Enter to end\n");
+    scanf("Enter");
 }
