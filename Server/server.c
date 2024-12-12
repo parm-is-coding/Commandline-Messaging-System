@@ -5,7 +5,10 @@
 #include <pthread.h>
 // sleep()
 #include <unistd.h>
-
+//socket()
+#include <sys/socket.h>
+//sock_addr_in
+#include <netinet/in.h>
 #define NUMTHREADS 2
 
 // void *readInput(void * args){
@@ -27,11 +30,16 @@
 
 
 void* thread1(){
-    printf("Thread start\n");
-    sleep(5);
-    printf("Thread half\n");
-    sleep(5);
-    printf("Thread finish\n");
+    int sockfd = socket(AF_INET,SOCK_STREAM,0);
+    // Figureout sockaddr and socklen_t
+    int ret;
+    struct sockaddr_in address;
+    
+    socklen_t addr_size = sizeof(address);
+    ret = bind(sockfd,address,addr_size);
+    if(ret == -1){
+        return -1;
+    }
     pthread_exit(0);
 }
 
