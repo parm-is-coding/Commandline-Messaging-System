@@ -50,10 +50,13 @@ struct sockaddr_in* populateAddress(struct sockaddr_in* pAddress,socklen_t addr_
 
 // Doesnt need to be threadsafe
 int init_server(const char * ipAddress,const __u_short portNumber){
+    // create the socket
     int sockfd = socket(AF_INET,SOCK_STREAM,0);
+    //populate the address
     struct sockaddr_in address = *populateAddress(&address,sizeof(address),portNumber,ipAddress);
     int ret;
     socklen_t addr_size = sizeof(address);
+    // bind the socket
     ret = bind(sockfd,(struct sockaddr*)&address,addr_size);
     if(ret == -1){
         printf("Error: Failed to bind socket");
