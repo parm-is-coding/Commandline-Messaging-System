@@ -54,6 +54,7 @@ int init_server(const char * ipAddress,const __u_short portNumber){
     int sockfd = socket(AF_INET,SOCK_STREAM,0);
     //populate the address
     struct sockaddr_in address = *populateAddress(&address,sizeof(address),portNumber,ipAddress);
+    printf("%d",address.sin_addr.s_addr);
     int ret;
     socklen_t addr_size = sizeof(address);
     // bind the socket
@@ -62,6 +63,15 @@ int init_server(const char * ipAddress,const __u_short portNumber){
         printf("Error: Failed to bind socket");
         return -1;
     }
+    listen(sockfd,1);
+    struct sockaddr_in clientAddress;
+    socklen_t clientAddrLen = sizeof(clientAddress);
+    int clientSocket = accept(sockfd,(struct sockaddr*)&clientAddress,&clientAddrLen);
+    char buffer[1024];
+    long int numBytesRead = read(clientSocket,buffer,1023);
+    printf("Read %li Bytes\nPayload: %s",numBytesRead,buffer);
+    close(clientSocket);
+    close(sockfd); 
     return 0;
 }
 
