@@ -5,6 +5,16 @@
 #include <pthread.h>
 // sleep()
 #include <unistd.h>
+//socket()
+#include <sys/socket.h>
+//sock_addr_in
+#include <netinet/in.h>
+// inet_addr()
+#include <arpa/inet.h>
+// exit()
+#include <stdlib.h>
+// memset
+#include <string.h>
 
 #define NUMTHREADS 2
 
@@ -26,21 +36,63 @@
 //     }
 
 
+struct sockaddr_in* populateAddress(struct sockaddr_in* pAddress,socklen_t addr_size,__u_short portNumber,const char* ipAddress){
+    //initializes the address to 0
+    memset(pAddress,0,addr_size); 
+    pAddress->sin_family = AF_INET;
+    // htons converts little-endian to big-endian
+    // if i wanted this to work on all machines consider implementing a helper function that figures out byte interpretation order
+    pAddress->sin_port = htons(portNumber); 
+    // TODO: add error checking of invalid ip addresses by using inet_aton instead of inet_addr
+    pAddress->sin_addr.s_addr = inet_addr(ipAddress);
+    return pAddress;
+}
+
+// Doesnt need to be threadsafe
+int init_server(const char * ipAddress,const __u_short portNumber){
+    // create the socket
+    int sockfd = socket(AF_INET,SOCK_STREAM,0);
+    //populate the address
+    struct sockaddr_in address = *populateAddress(&address,sizeof(address),portNumber,ipAddress);
+    printf("%d",address.sin_addr.s_addr);
+    int ret;
+    socklen_t addr_size = sizeof(address);
+    // bind the socket
+    ret = bind(sockfd,(struct sockaddr*)&address,addr_size);
+    if(ret != 0){
+        printf("Error: Failed to bind socket");
+        return -1;
+    }
+    listen(sockfd,1);
+    struct sockaddr_in clientAddress;
+    socklen_t clientAddrLen = sizeof(clientAddress);
+    int clientSocket = accept(sockfd,(struct sockaddr*)&clientAddress,&clientAddrLen);
+    char buffer[1024];
+    long int numBytesRead = read(clientSocket,buffer,1023);
+    printf("Read %li Bytes\nPayload: %s",numBytesRead,buffer);
+    close(clientSocket);
+    close(sockfd); 
+    return 0;
+}
+
 void* thread1(){
-    printf("Thread start\n");
-    sleep(5);
-    printf("Thread half\n");
-    sleep(5);
-    printf("Thread finish\n");
+    printf("Stuff that can run asynchronusly");
     pthread_exit(0);
 }
 
 int main (){
+    int checkError;
     printf("Enter IP address and port number of the client\n");
     printf("IP address is () on port ()\n");
-    printf("Connection has been Established\n");
+    const char* ipAddress = "127.0.0.1";
+    __u_short portNumber = 3000;
+    checkError = init_server(ipAddress,portNumber);
+    if(checkError == -1){
+        printf("Error: Failed init_server()");
+        exit(-1);
+    }
     
-    // bool exit = false;
+    printf("Connection has been Established\n");
     
     pthread_t thread;
     printf("Creating thread\n");
