@@ -58,7 +58,7 @@ int init_server(const char * ipAddress,const __u_short portNumber){
     socklen_t addr_size = sizeof(address);
     // bind the socket
     ret = bind(sockfd,(struct sockaddr*)&address,addr_size);
-    if(ret == -1){
+    if(ret != 0){
         printf("Error: Failed to bind socket");
         return -1;
     }
